@@ -106,8 +106,7 @@ fun HomeScreen(
                 icon = Icons.Default.Add,
                 text = "Add Food",
                 onClick = {
-                    // TODO: Navigate to add food screen
-                    println("Add Food clicked!")
+                    navController.navigate("add_food")
                 }
             )
             QuickActionButton(
