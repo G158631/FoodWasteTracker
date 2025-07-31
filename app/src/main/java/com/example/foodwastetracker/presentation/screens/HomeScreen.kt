@@ -113,8 +113,7 @@ fun HomeScreen(
                 icon = Icons.Default.List,
                 text = "Recipes",
                 onClick = {
-                    // TODO: Navigate to recipes
-                    println("Recipes clicked!")
+                    navController.navigate("recipes")
                 }
             )
             QuickActionButton(

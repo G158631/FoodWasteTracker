@@ -19,6 +19,7 @@ import com.example.foodwastetracker.ui.theme.FoodWasteTrackerTheme
 import com.example.foodwastetracker.di.DatabaseModule
 import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.presentation.screens.AddFoodScreen
+import com.example.foodwastetracker.presentation.screens.RecipesScreen
 import com.example.foodwastetracker.presentation.screens.StatisticsScreen
 
 class MainActivity : ComponentActivity() {
@@ -81,6 +82,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("statistics") {
                             StatisticsScreen(
+                                navController = navController,
+                                foodRepository = repository
+                            )
+                        }
+                        composable("recipes") {
+                            RecipesScreen(
                                 navController = navController,
                                 foodRepository = repository
                             )
