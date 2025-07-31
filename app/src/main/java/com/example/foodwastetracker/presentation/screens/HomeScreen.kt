@@ -121,8 +121,7 @@ fun HomeScreen(
                 icon = Icons.Default.Info,
                 text = "Stats",
                 onClick = {
-                    // TODO: Navigate to statistics
-                    println("Stats clicked!")
+                    navController.navigate("statistics")
                 }
             )
         }
