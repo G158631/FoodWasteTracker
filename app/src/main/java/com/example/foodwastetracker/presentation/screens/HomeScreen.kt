@@ -163,8 +163,8 @@ fun HomeScreen(
                     FoodItemCard(
                         foodItem = foodItem,
                         onItemClick = {
-                            // TODO: Navigate to food detail
-                            println("Food item clicked: ${foodItem.name}")
+                            // Navigate to food detail screen
+                            navController.navigate("food_detail/${foodItem.id}")
                         },
                         onMarkConsumed = { viewModel.markAsConsumed(foodItem) },
                         onDelete = { viewModel.deleteFoodItem(foodItem) }

@@ -1,5 +1,7 @@
 package com.example.foodwastetracker
 
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -14,11 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.foodwastetracker.presentation.screens.HomeScreen
 import com.example.foodwastetracker.ui.theme.FoodWasteTrackerTheme
 import com.example.foodwastetracker.di.DatabaseModule
 import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.presentation.screens.AddFoodScreen
+import com.example.foodwastetracker.presentation.screens.FoodDetailScreen
 import com.example.foodwastetracker.presentation.screens.RecipesScreen
 import com.example.foodwastetracker.presentation.screens.StatisticsScreen
 
@@ -92,8 +96,15 @@ class MainActivity : ComponentActivity() {
                                 foodRepository = repository
                             )
                         }
+                        composable("food_detail/{foodItemId}") { backStackEntry ->
+                            val foodItemId = backStackEntry.arguments?.getString("foodItemId") ?: ""
+                            FoodDetailScreen(
+                                navController = navController,
+                                foodRepository = repository,
+                                foodItemId = foodItemId
+                            )
+                        }
                     }
-
                         }
                     }
                 }
