@@ -12,6 +12,9 @@ interface FoodItemDao {
     @Query("SELECT * FROM food_items WHERE expirationDate <= :warningDate AND isConsumed = 0")
     fun getExpiringItems(warningDate: Long): Flow<List<FoodItem>>
 
+    @Query("SELECT * FROM food_items WHERE id = :id")
+    suspend fun getFoodItemById(id: String): FoodItem?
+
     @Insert
     suspend fun insertFoodItem(foodItem: FoodItem)
 
@@ -23,4 +26,10 @@ interface FoodItemDao {
 
     @Query("UPDATE food_items SET isConsumed = 1, dateConsumed = :dateConsumed WHERE id = :id")
     suspend fun markAsConsumed(id: String, dateConsumed: Long)
+
+    @Query("SELECT COUNT(*) FROM food_items WHERE isConsumed = 1")
+    fun getConsumedItemsCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM food_items WHERE isConsumed = 0")
+    fun getActiveItemsCount(): Flow<Int>
 }

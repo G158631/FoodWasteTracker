@@ -1,40 +1,21 @@
 package com.example.foodwastetracker.data.database
 
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverter
-import androidx.room.TypeConverters
+import android.content.Context
 import com.example.foodwastetracker.data.database.entities.FoodItem
-import com.example.foodwastetracker.data.database.entities.WasteLog
-import com.example.foodwastetracker.data.database.entities.UserSettings
 import com.example.foodwastetracker.data.database.dao.FoodItemDao
-import com.example.foodwastetracker.data.database.dao.WasteLogDao
-import com.example.foodwastetracker.data.database.dao.UserSettingsDao
 
 @Database(
-    entities = [FoodItem::class, WasteLog::class, UserSettings::class],
+    entities = [FoodItem::class],
     version = 1,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun foodItemDao(): FoodItemDao
-    abstract fun wasteLogDao(): WasteLogDao
-    abstract fun userSettingsDao(): UserSettingsDao
 
     companion object {
         const val DATABASE_NAME = "food_waste_tracker_db"
-    }
-}
-
-class Converters {
-    @TypeConverter
-    fun fromTimestamp(value: Long?): java.util.Date? {
-        return value?.let { java.util.Date(it) }
-    }
-
-    @TypeConverter
-    fun dateToTimestamp(date: java.util.Date?): Long? {
-        return date?.time
     }
 }

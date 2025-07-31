@@ -9,10 +9,11 @@ data class FoodItem(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val name: String,
     val category: String,
-    val purchaseDate: Long,
+    val purchaseDate: Long = System.currentTimeMillis(),
     val expirationDate: Long,
-    val quantity: Int,
-    val unit: String, // kg, pieces, liters, etc.
+    val quantity: Int = 1,
+    val unit: String = "pieces",
     val isConsumed: Boolean = false,
-    val dateConsumed: Long? = null
+    val dateConsumed: Long? = null,
+    val photoPath: String? = null
 )

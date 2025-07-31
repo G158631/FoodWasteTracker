@@ -1,10 +1,9 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt)
-    id("kotlin-kapt")
-}
+        alias(libs.plugins.android.application)
+        alias(libs.plugins.kotlin.android)
+        alias(libs.plugins.kotlin.compose)
+        id("kotlin-kapt")
+    }
 
 android {
     namespace = "com.example.foodwastetracker"
@@ -43,7 +42,7 @@ android {
 }
 
 dependencies {
-    // Original dependencies
+    // Core Android dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -53,29 +52,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // New dependencies for Food Waste Tracker
-    // Architecture & ViewModel
-    implementation(libs.androidx.lifecycle.viewmodel)
+    // Navigation
     implementation(libs.androidx.navigation.compose)
-
-    // Room Database
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
-
-    // Network
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp.logging)
-    implementation(libs.gson)
-
-    // Dependency Injection
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation)
-    kapt(libs.hilt.compiler)
-
-    // WorkManager
-    implementation(libs.androidx.work)
 
     // Testing
     testImplementation(libs.junit)
@@ -85,4 +63,18 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Room Database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel)
+
+    // WorkManager
+    implementation(libs.androidx.work)
+
+    // Network
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 }
