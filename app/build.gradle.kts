@@ -86,5 +86,12 @@ dependencies {
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // Network
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
 }
 

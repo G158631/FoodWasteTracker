@@ -9,17 +9,24 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.data.database.entities.FoodItem
-import com.example.foodwastetracker.presentation.screens.RecipeCategory
+import com.example.foodwastetracker.network.Recipe
+import com.example.foodwastetracker.network.RecipeRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.first
 
 data class RecipesUiState(
     val expiringItems: List<FoodItem> = emptyList(),
-    val recipeCategories: List<RecipeCategory> = emptyList(),
-    val isLoading: Boolean = false
+    val suggestedRecipes: List<Recipe> = emptyList(),
+    val categoryRecipes: Map<String, List<Recipe>> = emptyMap(),
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
 
 class RecipesViewModel(
     private val foodRepository: FoodRepository
 ) : ViewModel() {
+
+    private val recipeRepository = RecipeRepository()
 
     private val _uiState = MutableStateFlow(RecipesUiState())
     val uiState: StateFlow<RecipesUiState> = _uiState.asStateFlow()
@@ -30,106 +37,126 @@ class RecipesViewModel(
 
     private fun loadRecipes() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            combine(
-                foodRepository.getExpiringItems(3), // Items expiring in 3 days
-                foodRepository.getAllFoodItems()
-            ) { expiringItems, allItems ->
-                val categories = generateRecipeCategories(allItems, expiringItems)
-                RecipesUiState(
-                    expiringItems = expiringItems,
-                    recipeCategories = categories,
-                    isLoading = false
+            try {
+                // First get the food items
+                val expiringItems = foodRepository.getExpiringItems(3).first()
+                val allItems = foodRepository.getAllFoodItems().first()
+
+                // Load demo recipes immediately
+                val suggestedRecipes = recipeRepository.findRecipesByIngredients(
+                    expiringItems.map { it.name }
                 )
-            }.collect { newState ->
-                _uiState.value = newState
+
+                val categoryRecipes = mutableMapOf<String, List<Recipe>>()
+
+                // Add recipes for user's categories
+                val userCategories = allItems.map { it.category }.distinct()
+                for (category in userCategories) {
+                    categoryRecipes[category] = recipeRepository.searchRecipes(category)
+                }
+
+                // Always add these popular categories
+                categoryRecipes["Quick Meals"] = recipeRepository.searchRecipes("quick meals")
+                categoryRecipes["Healthy"] = recipeRepository.searchRecipes("healthy")
+
+                // Update state with all data
+                _uiState.value = RecipesUiState(
+                    expiringItems = expiringItems,
+                    suggestedRecipes = suggestedRecipes,
+                    categoryRecipes = categoryRecipes,
+                    isLoading = false,
+                    error = null
+                )
+
+            } catch (e: Exception) {
+                println("RecipesViewModel Error: ${e.message}")
+
+                // Fallback to basic demo data
+                val basicRecipes = recipeRepository.searchRecipes("general")
+                _uiState.value = RecipesUiState(
+                    expiringItems = emptyList(),
+                    suggestedRecipes = emptyList(),
+                    categoryRecipes = mapOf("Featured Recipes" to basicRecipes),
+                    isLoading = false,
+                    error = "Using demo recipes"
+                )
             }
         }
     }
 
-    private fun generateRecipeCategories(
-        allItems: List<FoodItem>,
-        expiringItems: List<FoodItem>
-    ): List<RecipeCategory> {
-        val categories = mutableListOf<RecipeCategory>()
+    private suspend fun loadRecipesForItems(expiringItems: List<FoodItem>, allItems: List<FoodItem>) {
+        try {
+            // Get recipes for expiring ingredients
+            val expiringIngredients = expiringItems.map { it.name.lowercase() }
+            val suggestedRecipes = if (expiringIngredients.isNotEmpty()) {
+                recipeRepository.findRecipesByIngredients(expiringIngredients)
+            } else {
+                emptyList()
+            }
 
-        // Get unique categories from user's food items
-        val userCategories = allItems.map { it.category }.distinct()
+            // Get recipes by category
+            val categories = allItems.map { it.category }.distinct()
+            val categoryRecipes = mutableMapOf<String, List<Recipe>>()
 
-        // Add category-specific recipes
-        if (userCategories.contains("Fruits")) {
-            categories.add(
-                RecipeCategory(
-                    name = "Fruit Smoothies & Desserts",
-                    description = "Perfect for using ripe fruits before they spoil",
-                    emoji = "🍓",
-                    recipeCount = 12,
-                    avgCookTime = "10 min"
-                )
+            for (category in categories) {
+                val recipes = recipeRepository.searchRecipes(category)
+                if (recipes.isNotEmpty()) {
+                    categoryRecipes[category] = recipes.take(3) // Limit to 3 per category
+                }
+            }
+
+            // Add some general categories
+            if (!categoryRecipes.containsKey("Quick Meals")) {
+                categoryRecipes["Quick Meals"] = recipeRepository.searchRecipes("quick easy meals").take(3)
+            }
+
+            if (!categoryRecipes.containsKey("Healthy")) {
+                categoryRecipes["Healthy"] = recipeRepository.searchRecipes("healthy recipes").take(3)
+            }
+
+            _uiState.value = _uiState.value.copy(
+                suggestedRecipes = suggestedRecipes,
+                categoryRecipes = categoryRecipes,
+                isLoading = false
+            )
+
+        } catch (e: Exception) {
+            _uiState.value = _uiState.value.copy(
+                error = "Failed to load recipe data: ${e.message}",
+                isLoading = false
             )
         }
+    }
 
-        if (userCategories.contains("Vegetables")) {
-            categories.add(
-                RecipeCategory(
-                    name = "Vegetable Stir-fries",
-                    description = "Quick and healthy ways to use fresh vegetables",
-                    emoji = "🥬",
-                    recipeCount = 18,
-                    avgCookTime = "15 min"
+    fun searchRecipes(query: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            try {
+                val recipes = recipeRepository.searchRecipes(query)
+                val updatedCategoryRecipes = _uiState.value.categoryRecipes.toMutableMap()
+                updatedCategoryRecipes["Search Results"] = recipes
+
+                _uiState.value = _uiState.value.copy(
+                    categoryRecipes = updatedCategoryRecipes,
+                    isLoading = false
                 )
-            )
-        }
-
-        if (userCategories.contains("Dairy")) {
-            categories.add(
-                RecipeCategory(
-                    name = "Cheese & Dairy Dishes",
-                    description = "Creamy recipes using milk, cheese, and yogurt",
-                    emoji = "🧀",
-                    recipeCount = 15,
-                    avgCookTime = "20 min"
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Search failed: ${e.message}",
+                    isLoading = false
                 )
-            )
+            }
         }
-
-        // Always add these popular categories
-        categories.addAll(listOf(
-            RecipeCategory(
-                name = "Quick & Easy Meals",
-                description = "Simple recipes using common ingredients",
-                emoji = "⚡",
-                recipeCount = 25,
-                avgCookTime = "15 min"
-            ),
-            RecipeCategory(
-                name = "Leftover Makeovers",
-                description = "Transform yesterday's food into today's delight",
-                emoji = "♻️",
-                recipeCount = 20,
-                avgCookTime = "12 min"
-            ),
-            RecipeCategory(
-                name = "One-Pot Wonders",
-                description = "Complete meals with minimal cleanup",
-                emoji = "🍲",
-                recipeCount = 16,
-                avgCookTime = "25 min"
-            ),
-            RecipeCategory(
-                name = "Healthy Snacks",
-                description = "Nutritious bites using fresh ingredients",
-                emoji = "🥗",
-                recipeCount = 14,
-                avgCookTime = "8 min"
-            )
-        ))
-
-        return categories
     }
 
     fun refreshRecipes() {
         loadRecipes()
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }
