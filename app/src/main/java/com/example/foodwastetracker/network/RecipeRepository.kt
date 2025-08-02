@@ -29,7 +29,7 @@ class RecipeRepository {
         return listOf(
             Recipe(
                 id = 1,
-                title = "Quick ${query} Stir Fry",
+                title = "Quick $query Stir Fry",
                 image = "https://picsum.photos/312/231?random=1",
                 readyInMinutes = 15,
                 servings = 2,
@@ -37,7 +37,7 @@ class RecipeRepository {
             ),
             Recipe(
                 id = 2,
-                title = "${query} Smoothie Bowl",
+                title = "$query Smoothie Bowl",
                 image = "https://picsum.photos/312/231?random=2",
                 readyInMinutes = 10,
                 servings = 1,
@@ -45,7 +45,7 @@ class RecipeRepository {
             ),
             Recipe(
                 id = 3,
-                title = "Roasted ${query}",
+                title = "Roasted $query",
                 image = "https://picsum.photos/312/231?random=3",
                 readyInMinutes = 25,
                 servings = 4,
@@ -53,7 +53,7 @@ class RecipeRepository {
             ),
             Recipe(
                 id = 4,
-                title = "${query} Salad Supreme",
+                title = "$query Salad Supreme",
                 image = "https://picsum.photos/312/231?random=4",
                 readyInMinutes = 8,
                 servings = 2,

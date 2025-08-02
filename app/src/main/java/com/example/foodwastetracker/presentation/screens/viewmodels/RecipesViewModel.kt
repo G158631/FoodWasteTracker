@@ -2,17 +2,15 @@ package com.example.foodwastetracker.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.foodwastetracker.data.database.entities.FoodItem
+import com.example.foodwastetracker.data.repository.FoodRepository
+import com.example.foodwastetracker.network.Recipe
+import com.example.foodwastetracker.network.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.example.foodwastetracker.data.repository.FoodRepository
-import com.example.foodwastetracker.data.database.entities.FoodItem
-import com.example.foodwastetracker.network.Recipe
-import com.example.foodwastetracker.network.RecipeRepository
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.first
 
 data class RecipesUiState(
     val expiringItems: List<FoodItem> = emptyList(),

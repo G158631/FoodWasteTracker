@@ -3,6 +3,7 @@ package com.example.foodwastetracker.presentation.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -12,7 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
@@ -23,19 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.data.database.entities.FoodItem
 import com.example.foodwastetracker.utils.CameraUtils
 import kotlinx.coroutines.launch
-
-import coil.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +47,7 @@ fun AddFoodScreen(
     var isLoading by remember { mutableStateOf(false) }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
     var showPermissionDialog by remember { mutableStateOf(false) }
+    var showQuantityDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -64,7 +61,7 @@ fun AddFoodScreen(
         }
     }
 
-// Camera permission launcher (declare this SECOND)
+    // Camera permission launcher (declare this SECOND)
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -73,7 +70,7 @@ fun AddFoodScreen(
             val imageFile = CameraUtils.createImageFile(context)
             val uri = CameraUtils.getUriForFile(context, imageFile)
             photoUri = uri
-            cameraLauncher.launch(uri)  // ← Now this will work!
+            cameraLauncher.launch(uri)
         } else {
             showPermissionDialog = true
         }
@@ -98,7 +95,7 @@ fun AddFoodScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = Color.White
                         )
@@ -162,7 +159,7 @@ fun AddFoodScreen(
                                         .fillMaxSize()
                                         .clip(RoundedCornerShape(8.dp)),
                                     contentScale = ContentScale.Crop,
-                                    error = painterResource(android.R.drawable.ic_menu_gallery)
+                                    error = androidx.compose.ui.res.painterResource(android.R.drawable.ic_menu_gallery)
                                 )
                             } else {
                                 Column(
@@ -291,27 +288,43 @@ fun AddFoodScreen(
                     // Add Button
                     Button(
                         onClick = {
-                            if (foodName.isNotBlank() && category.isNotBlank()) {
-                                isLoading = true
-                                scope.launch {
-                                    try {
-                                        val expirationDate = System.currentTimeMillis() +
-                                                (expirationDays.toIntOrNull() ?: 7) * 24 * 60 * 60 * 1000L
+                            when {
+                                foodName.isBlank() -> {
+                                    // Could add name validation popup here if needed
+                                }
+                                category.isBlank() -> {
+                                    // Could add category validation popup here if needed
+                                }
+                                quantity.toIntOrNull() == 0 || quantity.isBlank() -> {
+                                    // Show quantity validation popup
+                                    showQuantityDialog = true
+                                }
+                                else -> {
+                                    isLoading = true
+                                    scope.launch {
+                                        try {
+                                            val expirationDate = System.currentTimeMillis() +
+                                                    (expirationDays.toIntOrNull() ?: 7) * 24 * 60 * 60 * 1000L
 
-                                        val foodItem = FoodItem(
-                                            name = foodName.trim(),
-                                            category = category,
-                                            quantity = quantity.toIntOrNull() ?: 1,
-                                            unit = unit,
-                                            expirationDate = expirationDate,
-                                            photoPath = photoUri?.toString()
-                                        )
+                                            val foodItem = FoodItem(
+                                                name = foodName.trim(),
+                                                category = category,
+                                                quantity = quantity.toIntOrNull() ?: 1,
+                                                unit = unit,
+                                                expirationDate = expirationDate,
+                                                photoPath = photoUri?.toString()
+                                            )
 
-                                        foodRepository.addFoodItem(foodItem)
-                                        navController.navigateUp() // Go back to home
-                                    } catch (e: Exception) {
-                                        // Handle error
-                                        isLoading = false
+                                            foodRepository.addFoodItem(foodItem)
+                                            Toast.makeText(
+                                                context,
+                                                "✅ ${foodName.trim()} added successfully!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            navController.navigateUp()
+                                        } catch (_: Exception) {
+                                            isLoading = false
+                                        }
                                     }
                                 }
                             }
@@ -343,6 +356,22 @@ fun AddFoodScreen(
             text = { Text("This app needs camera permission to take photos of your food items.") },
             confirmButton = {
                 TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    // Quantity Validation Dialog
+    if (showQuantityDialog) {
+        AlertDialog(
+            onDismissRequest = { showQuantityDialog = false },
+            title = { Text("Invalid Quantity") },
+            text = { Text("Please enter a valid quantity greater than 0. You cannot add food items with zero quantity.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { showQuantityDialog = false }
+                ) {
                     Text("OK")
                 }
             }

@@ -1,11 +1,9 @@
 package com.example.foodwastetracker.data.database
 
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.content.Context
-import com.example.foodwastetracker.data.database.entities.FoodItem
 import com.example.foodwastetracker.data.database.dao.FoodItemDao
+import com.example.foodwastetracker.data.database.entities.FoodItem
 
 @Database(
     entities = [FoodItem::class],

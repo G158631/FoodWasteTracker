@@ -1,4 +1,4 @@
-package com.example.foodwastetracker.presentation.viewmodels
+package com.example.foodwastetracker.presentation.screens.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -50,7 +50,4 @@ class StatisticsViewModel(
         }
     }
 
-    fun refreshStatistics() {
-        loadStatistics()
-    }
 }

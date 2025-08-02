@@ -11,8 +11,8 @@ object CameraUtils {
 
     fun createImageFile(context: Context): File {
         // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir: File = File(context.filesDir, "food_images")
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = File(context.filesDir, "food_images")
         if (!storageDir.exists()) {
             storageDir.mkdirs()
         }
@@ -21,8 +21,7 @@ object CameraUtils {
     }
 
     fun getUriForFile(context: Context, file: File): Uri {
-        return FileProvider.getUriForFile(
-            context,
+        return FileProvider.getUriForFile(context,
             "${context.packageName}.fileprovider",
             file
         )

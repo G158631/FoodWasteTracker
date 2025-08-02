@@ -12,7 +12,8 @@ android {
     defaultConfig {
         applicationId = "com.example.foodwastetracker"
         minSdk = 24
-        targetSdk = 35
+        //noinspection OldTargetApi
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -93,5 +94,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.gson)
+
+    // WorkManager for background tasks
+    implementation(libs.androidx.work.runtime)
 }
 

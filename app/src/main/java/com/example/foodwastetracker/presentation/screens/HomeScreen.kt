@@ -1,26 +1,51 @@
 package com.example.foodwastetracker.presentation.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.data.database.entities.FoodItem
-import com.example.foodwastetracker.presentation.viewmodels.HomeViewModel
+import com.example.foodwastetracker.data.repository.FoodRepository
+import com.example.foodwastetracker.presentation.screens.viewmodels.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +56,7 @@ fun HomeScreen(
     // Create ViewModel
     val viewModel = remember { HomeViewModel(foodRepository) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -41,6 +67,7 @@ fun HomeScreen(
         Text(
             text = "Food Waste Tracker",
             style = MaterialTheme.typography.headlineMedium,
+            color = Color.White,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -105,23 +132,17 @@ fun HomeScreen(
             QuickActionButton(
                 icon = Icons.Default.Add,
                 text = "Add Food",
-                onClick = {
-                    navController.navigate("add_food")
-                }
+                onClick = { navController.navigate("add_food") }
             )
             QuickActionButton(
-                icon = Icons.Default.List,
+                icon = Icons.AutoMirrored.Filled.List,
                 text = "Recipes",
-                onClick = {
-                    navController.navigate("recipes")
-                }
+                onClick = { navController.navigate("recipes") }
             )
             QuickActionButton(
                 icon = Icons.Default.Info,
                 text = "Stats",
-                onClick = {
-                    navController.navigate("statistics")
-                }
+                onClick = { navController.navigate("statistics") }
             )
         }
 
@@ -140,7 +161,7 @@ fun HomeScreen(
                 CircularProgressIndicator()
             }
         } else if (uiState.foodItems.isEmpty()) {
-            // Empty state
+            // Simple Empty state
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -163,11 +184,16 @@ fun HomeScreen(
                     FoodItemCard(
                         foodItem = foodItem,
                         onItemClick = {
-                            // Navigate to food detail screen
                             navController.navigate("food_detail/${foodItem.id}")
                         },
-                        onMarkConsumed = { viewModel.markAsConsumed(foodItem) },
-                        onDelete = { viewModel.deleteFoodItem(foodItem) }
+                        onMarkConsumed = {
+                            viewModel.markAsConsumed(foodItem)
+                            Toast.makeText(context, "✅ ${foodItem.name} marked as consumed!", Toast.LENGTH_SHORT).show()
+                        },
+                        onDelete = {
+                            viewModel.deleteFoodItem(foodItem)
+                            Toast.makeText(context, "🗑️ ${foodItem.name} deleted successfully!", Toast.LENGTH_SHORT).show()
+                        }
                     )
                 }
             }
@@ -233,6 +259,9 @@ fun FoodItemCard(
     onMarkConsumed: () -> Unit,
     onDelete: () -> Unit
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showConsumedDialog by remember { mutableStateOf(false) }
+
     val daysUntilExpiration = ((foodItem.expirationDate - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)).toInt()
     val isExpiringSoon = daysUntilExpiration <= 3
 
@@ -277,14 +306,14 @@ fun FoodItemCard(
             }
 
             Row {
-                IconButton(onClick = onMarkConsumed) {
+                IconButton(onClick = { showConsumedDialog = true }) {
                     Icon(
                         Icons.Default.CheckCircle,
                         contentDescription = "Mark as consumed",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onDelete) {
+                IconButton(onClick = { showDeleteDialog = true }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete item",
@@ -293,5 +322,57 @@ fun FoodItemCard(
                 }
             }
         }
+    }
+
+    /* Delete Confirmation Dialog */
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Food Item") },
+            text = { Text("Are you sure you want to delete '${foodItem.name}'? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete()
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Mark as Consumed Confirmation Dialog
+    if (showConsumedDialog) {
+        AlertDialog(
+            onDismissRequest = { showConsumedDialog = false },
+            title = { Text("Mark as Consumed") },
+            text = { Text("Mark '${foodItem.name}' as consumed? This will move it to your consumed items list.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showConsumedDialog = false
+                        onMarkConsumed()
+                    }
+                ) {
+                    Text("Mark as Consumed", color = Color(0xFF4CAF50))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showConsumedDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

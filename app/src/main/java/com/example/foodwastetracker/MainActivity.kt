@@ -1,30 +1,31 @@
 package com.example.foodwastetracker
 
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.foodwastetracker.presentation.screens.HomeScreen
-import com.example.foodwastetracker.ui.theme.FoodWasteTrackerTheme
-import com.example.foodwastetracker.di.DatabaseModule
 import com.example.foodwastetracker.data.repository.FoodRepository
+import com.example.foodwastetracker.di.DatabaseModule
 import com.example.foodwastetracker.presentation.screens.AddFoodScreen
 import com.example.foodwastetracker.presentation.screens.FoodDetailScreen
+import com.example.foodwastetracker.presentation.screens.HomeScreen
 import com.example.foodwastetracker.presentation.screens.RecipesScreen
 import com.example.foodwastetracker.presentation.screens.StatisticsScreen
+import com.example.foodwastetracker.ui.theme.FoodWasteTrackerTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -32,6 +33,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val notificationPermissionLauncher = registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                // Permission result handled
+            }
+
+            // Check and request notification permission
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
 
         // Initialize database and repository
         val database = DatabaseModule.provideAppDatabase(this)
