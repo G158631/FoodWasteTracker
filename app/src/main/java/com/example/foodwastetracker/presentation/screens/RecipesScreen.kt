@@ -53,7 +53,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.network.Recipe
-import com.example.foodwastetracker.presentation.viewmodels.RecipesViewModel
+import com.example.foodwastetracker.presentation.screens.viewmodels.RecipesViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

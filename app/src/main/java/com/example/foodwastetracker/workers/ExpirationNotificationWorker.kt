@@ -30,15 +30,16 @@ class ExpirationNotificationWorker(
             val hasExpiringItems = true
 
             if (hasExpiringItems) {
-                sendNotification(1, "Bananas")
+                sendNotification(2, "Milk")
             }
 
             Result.success()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Result.failure()
         }
     }
 
+    @Suppress("SameParameterValue")
     private fun sendNotification(count: Int, firstItemName: String) {
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

@@ -1,4 +1,4 @@
-package com.example.foodwastetracker.presentation.viewmodels
+package com.example.foodwastetracker.presentation.screens.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -84,77 +84,4 @@ class RecipesViewModel(
         }
     }
 
-    private suspend fun loadRecipesForItems(expiringItems: List<FoodItem>, allItems: List<FoodItem>) {
-        try {
-            // Get recipes for expiring ingredients
-            val expiringIngredients = expiringItems.map { it.name.lowercase() }
-            val suggestedRecipes = if (expiringIngredients.isNotEmpty()) {
-                recipeRepository.findRecipesByIngredients(expiringIngredients)
-            } else {
-                emptyList()
-            }
-
-            // Get recipes by category
-            val categories = allItems.map { it.category }.distinct()
-            val categoryRecipes = mutableMapOf<String, List<Recipe>>()
-
-            for (category in categories) {
-                val recipes = recipeRepository.searchRecipes(category)
-                if (recipes.isNotEmpty()) {
-                    categoryRecipes[category] = recipes.take(3) // Limit to 3 per category
-                }
-            }
-
-            // Add some general categories
-            if (!categoryRecipes.containsKey("Quick Meals")) {
-                categoryRecipes["Quick Meals"] = recipeRepository.searchRecipes("quick easy meals").take(3)
-            }
-
-            if (!categoryRecipes.containsKey("Healthy")) {
-                categoryRecipes["Healthy"] = recipeRepository.searchRecipes("healthy recipes").take(3)
-            }
-
-            _uiState.value = _uiState.value.copy(
-                suggestedRecipes = suggestedRecipes,
-                categoryRecipes = categoryRecipes,
-                isLoading = false
-            )
-
-        } catch (e: Exception) {
-            _uiState.value = _uiState.value.copy(
-                error = "Failed to load recipe data: ${e.message}",
-                isLoading = false
-            )
-        }
-    }
-
-    fun searchRecipes(query: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-
-            try {
-                val recipes = recipeRepository.searchRecipes(query)
-                val updatedCategoryRecipes = _uiState.value.categoryRecipes.toMutableMap()
-                updatedCategoryRecipes["Search Results"] = recipes
-
-                _uiState.value = _uiState.value.copy(
-                    categoryRecipes = updatedCategoryRecipes,
-                    isLoading = false
-                )
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    error = "Search failed: ${e.message}",
-                    isLoading = false
-                )
-            }
-        }
-    }
-
-    fun refreshRecipes() {
-        loadRecipes()
-    }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
 }

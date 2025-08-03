@@ -2,11 +2,6 @@ package com.example.foodwastetracker.network
 
 import com.google.gson.annotations.SerializedName
 
-data class SpoonacularResponse(
-    @SerializedName("results")
-    val results: List<Recipe>
-)
-
 data class Recipe(
     @SerializedName("id")
     val id: Int,
@@ -45,24 +40,5 @@ data class Ingredient(
     val name: String,
     @SerializedName("original")
     val original: String
-)
-
-data class RecipeDetails(
-    @SerializedName("id")
-    val id: Int,
-    @SerializedName("title")
-    val title: String,
-    @SerializedName("image")
-    val image: String,
-    @SerializedName("readyInMinutes")
-    val readyInMinutes: Int,
-    @SerializedName("servings")
-    val servings: Int,
-    @SerializedName("summary")
-    val summary: String,
-    @SerializedName("analyzedInstructions")
-    val instructions: List<InstructionSet>,
-    @SerializedName("extendedIngredients")
-    val ingredients: List<Ingredient>
 )
 
