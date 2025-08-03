@@ -1,5 +1,6 @@
 package com.example.foodwastetracker.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -66,16 +67,32 @@ fun RecipesScreen(
     val viewModel = remember { RecipesViewModel(foodRepository) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF009688) // Same background as other screens
+    // Beautiful gradient background - same as other screens
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF4CAF50), // Green
+                        Color(0xFF66BB6A), // Light Green
+                        Color(0xFF81C784)  // Lighter Green
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             // Top Bar
             TopAppBar(
-                title = { Text("Recipe Suggestions", color = Color.White) },
+                title = {
+                    Text(
+                        "Recipe Suggestions",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -132,8 +149,9 @@ fun RecipesScreen(
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFFFE0B2) // Light orange
-                                )
+                                    containerColor = Color(0xFFFFE0B2).copy(alpha = 0.95f) // Light orange with transparency
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(16.dp)
@@ -160,6 +178,14 @@ fun RecipesScreen(
                     // Suggested Recipes for Expiring Items
                     item {
                         if (uiState.suggestedRecipes.isNotEmpty()) {
+                            Text(
+                                text = "🍳 Recipes for Your Expiring Items",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+                            )
+
                             val listState = rememberLazyListState()
                             val scope = rememberCoroutineScope()
 
@@ -192,12 +218,12 @@ fun RecipesScreen(
                                     modifier = Modifier
                                         .align(Alignment.CenterStart)
                                         .size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                                    containerColor = Color.White.copy(alpha = 0.9f)
                                 ) {
                                     Icon(
                                         Icons.Default.KeyboardArrowLeft,
                                         contentDescription = "Previous",
-                                        tint = Color.White
+                                        tint = Color(0xFF4CAF50)
                                     )
                                 }
 
@@ -214,19 +240,19 @@ fun RecipesScreen(
                                     modifier = Modifier
                                         .align(Alignment.CenterEnd)
                                         .size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                                    containerColor = Color.White.copy(alpha = 0.9f)
                                 ) {
                                     Icon(
                                         Icons.Default.KeyboardArrowRight,
                                         contentDescription = "Next",
-                                        tint = Color.White
+                                        tint = Color(0xFF4CAF50)
                                     )
                                 }
                             }
                         }
                     }
 
-// For Category Recipes sections
+                    // For Category Recipes sections
                     uiState.categoryRecipes.forEach { (category, recipes) ->
                         if (recipes.isNotEmpty()) {
                             item {
@@ -272,12 +298,12 @@ fun RecipesScreen(
                                         modifier = Modifier
                                             .align(Alignment.CenterStart)
                                             .size(40.dp),
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                                        containerColor = Color.White.copy(alpha = 0.9f)
                                     ) {
                                         Icon(
                                             Icons.Default.KeyboardArrowLeft,
                                             contentDescription = "Previous",
-                                            tint = Color.White
+                                            tint = Color(0xFF4CAF50)
                                         )
                                     }
 
@@ -294,12 +320,12 @@ fun RecipesScreen(
                                         modifier = Modifier
                                             .align(Alignment.CenterEnd)
                                             .size(40.dp),
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                                        containerColor = Color.White.copy(alpha = 0.9f)
                                     ) {
                                         Icon(
                                             Icons.Default.KeyboardArrowRight,
                                             contentDescription = "Next",
-                                            tint = Color.White
+                                            tint = Color(0xFF4CAF50)
                                         )
                                     }
                                 }
@@ -313,8 +339,9 @@ fun RecipesScreen(
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFFFCDD2) // Light red
-                                )
+                                    containerColor = Color(0xFFFFCDD2).copy(alpha = 0.95f) // Light red with transparency
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(16.dp)
@@ -354,8 +381,11 @@ fun RecipeCard(
         modifier = Modifier
             .width(280.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        shape = RoundedCornerShape(12.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        )
     ) {
         Column {
             // Recipe Image
@@ -378,7 +408,8 @@ fun RecipeCard(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color(0xFF212121)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -394,13 +425,13 @@ fun RecipeCard(
                             Icons.Default.Delete, // Using available icon as timer
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color(0xFF4CAF50)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${recipe.readyInMinutes}min",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color(0xFF4CAF50)
                         )
                     }
 
@@ -411,13 +442,13 @@ fun RecipeCard(
                             Icons.Default.Warning, // Using available icon as people
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = Color(0xFF757575)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${recipe.servings} servings",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = Color(0xFF757575)
                         )
                     }
                 }
@@ -428,7 +459,7 @@ fun RecipeCard(
                     Text(
                         text = summary.replace(Regex("<.*?>"), ""), // Remove HTML tags
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = Color(0xFF666666),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )

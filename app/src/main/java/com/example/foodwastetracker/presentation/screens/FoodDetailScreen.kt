@@ -1,28 +1,63 @@
 package com.example.foodwastetracker.presentation.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.foodwastetracker.data.repository.FoodRepository
 import com.example.foodwastetracker.presentation.screens.viewmodels.FoodDetailViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,9 +94,19 @@ fun FoodDetailScreen(
     val categories = listOf("Fruits", "Vegetables", "Dairy", "Meat", "Pantry", "Frozen", "Other")
     val units = listOf("pieces", "kg", "grams", "liters", "bottles", "packages")
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF009688)
+    // Beautiful gradient background - same as all other screens
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF4CAF50), // Green
+                        Color(0xFF66BB6A), // Light Green
+                        Color(0xFF81C784)  // Lighter Green
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -70,8 +115,9 @@ fun FoodDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (isEditing) "Edit Food Item" else "Food Details",
-                        color = Color.White
+                        text = if (isEditing) "Edit Food Item" else " Food Details",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 },
                 navigationIcon = {
@@ -104,7 +150,7 @@ fun FoodDetailScreen(
                                 }
                             ) {
                                 Icon(
-                                    Icons.Default.List,
+                                    Icons.AutoMirrored.Filled.List,
                                     contentDescription = "Save",
                                     tint = Color.White
                                 )
@@ -147,8 +193,10 @@ fun FoodDetailScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (foodItem.isConsumed)
-                                    Color(0xFFC8E6C9) else MaterialTheme.colorScheme.surface
-                            )
+                                    Color(0xFFC8E6C9).copy(alpha = 0.95f)
+                                else Color.White.copy(alpha = 0.95f)
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -162,7 +210,7 @@ fun FoodDetailScreen(
                                         text = if (foodItem.isConsumed) "✅ Consumed" else "📦 Active",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (foodItem.isConsumed) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary
+                                        color = if (foodItem.isConsumed) Color(0xFF2E7D32) else Color(0xFF4CAF50)
                                     )
                                     if (foodItem.isConsumed && foodItem.dateConsumed != null) {
                                         Text(
@@ -184,8 +232,8 @@ fun FoodDetailScreen(
                                             else -> "Expired ${-daysUntilExpiration} days ago"
                                         },
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = if (isExpiring) MaterialTheme.colorScheme.error
-                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = if (isExpiring) Color(0xFFD32F2F)
+                                        else Color(0xFF757575),
                                         fontWeight = if (isExpiring) FontWeight.Bold else FontWeight.Normal
                                     )
                                 }
@@ -194,7 +242,11 @@ fun FoodDetailScreen(
 
                         // Food Details Card
                         Card(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White.copy(alpha = 0.95f)
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),
@@ -203,7 +255,8 @@ fun FoodDetailScreen(
                                 Text(
                                     text = "Food Information",
                                     style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF4CAF50)
                                 )
 
                                 if (isEditing) {
@@ -213,7 +266,11 @@ fun FoodDetailScreen(
                                         onValueChange = { editedName = it },
                                         label = { Text("Food Name") },
                                         modifier = Modifier.fillMaxWidth(),
-                                        singleLine = true
+                                        singleLine = true,
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = Color(0xFF4CAF50),
+                                            focusedLabelColor = Color(0xFF4CAF50)
+                                        )
                                     )
 
                                     // Category Dropdown
@@ -230,7 +287,11 @@ fun FoodDetailScreen(
                                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                                             modifier = Modifier
                                                 .menuAnchor()
-                                                .fillMaxWidth()
+                                                .fillMaxWidth(),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedBorderColor = Color(0xFF4CAF50),
+                                                focusedLabelColor = Color(0xFF4CAF50)
+                                            )
                                         )
                                         ExposedDropdownMenu(
                                             expanded = categoryExpanded,
@@ -256,7 +317,11 @@ fun FoodDetailScreen(
                                             onValueChange = { if (it.all { char -> char.isDigit() }) editedQuantity = it },
                                             label = { Text("Quantity") },
                                             modifier = Modifier.weight(1f),
-                                            singleLine = true
+                                            singleLine = true,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedBorderColor = Color(0xFF4CAF50),
+                                                focusedLabelColor = Color(0xFF4CAF50)
+                                            )
                                         )
 
                                         var unitExpanded by remember { mutableStateOf(false) }
@@ -271,7 +336,11 @@ fun FoodDetailScreen(
                                                 readOnly = true,
                                                 label = { Text("Unit") },
                                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
-                                                modifier = Modifier.menuAnchor()
+                                                modifier = Modifier.menuAnchor(),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedBorderColor = Color(0xFF4CAF50),
+                                                    focusedLabelColor = Color(0xFF4CAF50)
+                                                )
                                             )
                                             ExposedDropdownMenu(
                                                 expanded = unitExpanded,
@@ -295,7 +364,11 @@ fun FoodDetailScreen(
                                         onValueChange = { if (it.all { char -> char.isDigit() }) editedExpirationDays = it },
                                         label = { Text("Days until expiration") },
                                         modifier = Modifier.fillMaxWidth(),
-                                        singleLine = true
+                                        singleLine = true,
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = Color(0xFF4CAF50),
+                                            focusedLabelColor = Color(0xFF4CAF50)
+                                        )
                                     )
                                 } else {
                                     // View Mode
@@ -311,7 +384,11 @@ fun FoodDetailScreen(
                         // Action Buttons (only for active items)
                         if (!foodItem.isConsumed) {
                             Card(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.White.copy(alpha = 0.95f)
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(20.dp),
@@ -320,7 +397,8 @@ fun FoodDetailScreen(
                                     Text(
                                         text = "Actions",
                                         style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF4CAF50)
                                     )
 
                                     // Mark as Consumed Button
@@ -335,7 +413,8 @@ fun FoodDetailScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = Color(0xFF4CAF50)
-                                        )
+                                        ),
+                                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                                     ) {
                                         Icon(
                                             Icons.Default.Info,
@@ -357,7 +436,7 @@ fun FoodDetailScreen(
                                         },
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = ButtonDefaults.outlinedButtonColors(
-                                            contentColor = MaterialTheme.colorScheme.error
+                                            contentColor = Color(0xFFD32F2F)
                                         )
                                     ) {
                                         Icon(
@@ -387,13 +466,14 @@ fun DetailRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = Color(0xFF757575),
             modifier = Modifier.weight(1f)
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
+            color = Color(0xFF212121),
             modifier = Modifier.weight(2f)
         )
     }
@@ -403,4 +483,3 @@ private fun formatDate(timestamp: Long): String {
     val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     return formatter.format(Date(timestamp))
 }
-

@@ -24,6 +24,7 @@ import com.example.foodwastetracker.presentation.screens.FoodDetailScreen
 import com.example.foodwastetracker.presentation.screens.HomeScreen
 import com.example.foodwastetracker.presentation.screens.RecipesScreen
 import com.example.foodwastetracker.presentation.screens.StatisticsScreen
+import com.example.foodwastetracker.presentation.screens.WelcomeScreen
 import com.example.foodwastetracker.ui.theme.FoodWasteTrackerTheme
 import kotlinx.coroutines.launch
 
@@ -89,8 +90,13 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = "home"
+                        startDestination = "welcome"
                     ) {
+                        // Welcome Screen - First screen users see
+                        composable("welcome") {
+                            WelcomeScreen(navController = navController)
+                        }
+
                         composable("home") {
                             HomeScreen(
                                 navController = navController,
@@ -124,8 +130,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                        }
-                    }
                 }
             }
         }
+    }
+}

@@ -1,6 +1,7 @@
 package com.example.foodwastetracker.presentation.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,143 +60,172 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    Column(
+    // Beautiful gradient background - same as welcome screen
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Header
-        Text(
-            text = "Food Waste Tracker",
-            style = MaterialTheme.typography.headlineMedium,
-            color = Color.White,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Stats Summary
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF4CAF50), // Green
+                        Color(0xFF66BB6A), // Light Green
+                        Color(0xFF81C784)  // Lighter Green
+                    )
+                )
             )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                StatItem(
-                    value = uiState.activeItemsCount.toString(),
-                    label = "Active Items"
-                )
-                StatItem(
-                    value = uiState.expiringItems.size.toString(),
-                    label = "Expiring Soon"
-                )
-            }
-        }
+            // Header
+            Text(
+                text = "GLENIEL Food Waste Tracker",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        // Expiring Items Alert
-        if (uiState.expiringItems.isNotEmpty()) {
+            // Stats Summary
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
+                    containerColor = Color.White.copy(alpha = 0.9f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    StatItem(
+                        value = uiState.activeItemsCount.toString(),
+                        label = "Active Items"
+                    )
+                    StatItem(
+                        value = uiState.expiringItems.size.toString(),
+                        label = "Expiring Soon"
+                    )
+                }
+            }
+
+            // Expiring Items Alert
+            if (uiState.expiringItems.isNotEmpty()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFFEB3B).copy(alpha = 0.9f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "⚠️ ${uiState.expiringItems.size} items expiring soon!",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color(0xFF795548)
+                        )
+                        Text(
+                            text = "Check your inventory and use them quickly",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF795548)
+                        )
+                    }
+                }
+            }
+
+            // Quick Actions
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                QuickActionButton(
+                    icon = Icons.Default.Add,
+                    text = "Add Food",
+                    onClick = { navController.navigate("add_food") }
                 )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "⚠️ ${uiState.expiringItems.size} items expiring soon!",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Text(
-                        text = "Check your inventory and use them quickly",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                QuickActionButton(
+                    icon = Icons.AutoMirrored.Filled.List,
+                    text = "Recipes",
+                    onClick = { navController.navigate("recipes") }
+                )
+                QuickActionButton(
+                    icon = Icons.Default.Info,
+                    text = "Stats",
+                    onClick = { navController.navigate("statistics") }
+                )
+            }
+
+            // Food Items List
+            Text(
+                text = "Your Food Items (${uiState.foodItems.size})",
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
                 }
-            }
-        }
-
-        // Quick Actions
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            QuickActionButton(
-                icon = Icons.Default.Add,
-                text = "Add Food",
-                onClick = { navController.navigate("add_food") }
-            )
-            QuickActionButton(
-                icon = Icons.AutoMirrored.Filled.List,
-                text = "Recipes",
-                onClick = { navController.navigate("recipes") }
-            )
-            QuickActionButton(
-                icon = Icons.Default.Info,
-                text = "Stats",
-                onClick = { navController.navigate("statistics") }
-            )
-        }
-
-        // Food Items List
-        Text(
-            text = "Your Food Items (${uiState.foodItems.size})",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (uiState.foodItems.isEmpty()) {
-            // Simple Empty state
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No food items yet",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Tap 'Add Food' to get started!",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        } else {
-            LazyColumn {
-                items(uiState.foodItems) { foodItem ->
-                    FoodItemCard(
-                        foodItem = foodItem,
-                        onItemClick = {
-                            navController.navigate("food_detail/${foodItem.id}")
-                        },
-                        onMarkConsumed = {
-                            viewModel.markAsConsumed(foodItem)
-                            Toast.makeText(context, "✅ ${foodItem.name} marked as consumed!", Toast.LENGTH_SHORT).show()
-                        },
-                        onDelete = {
-                            viewModel.deleteFoodItem(foodItem)
-                            Toast.makeText(context, "🗑️ ${foodItem.name} deleted successfully!", Toast.LENGTH_SHORT).show()
+            } else if (uiState.foodItems.isEmpty()) {
+                // Simple Empty state
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White.copy(alpha = 0.9f)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Text(
+                                text = "No food items yet",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color(0xFF4CAF50)
+                            )
+                            Text(
+                                text = "Tap 'Add Food' to get started!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF757575)
+                            )
                         }
-                    )
+                    }
+                }
+            } else {
+                LazyColumn {
+                    items(uiState.foodItems) { foodItem ->
+                        FoodItemCard(
+                            foodItem = foodItem,
+                            onItemClick = {
+                                navController.navigate("food_detail/${foodItem.id}")
+                            },
+                            onMarkConsumed = {
+                                viewModel.markAsConsumed(foodItem)
+                                Toast.makeText(context, "✅ ${foodItem.name} marked as consumed!", Toast.LENGTH_SHORT).show()
+                            },
+                            onDelete = {
+                                viewModel.deleteFoodItem(foodItem)
+                                Toast.makeText(context, "🗑️ ${foodItem.name} deleted successfully!", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -207,12 +238,12 @@ fun StatItem(value: String, label: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = Color(0xFF4CAF50)
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = Color(0xFF757575)
         )
     }
 }
@@ -227,7 +258,10 @@ fun QuickActionButton(
         modifier = Modifier
             .clickable { onClick() }
             .size(80.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.9f)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -239,14 +273,16 @@ fun QuickActionButton(
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                tint = Color(0xFF4CAF50)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                color = Color(0xFF4CAF50)
             )
         }
     }
@@ -272,9 +308,10 @@ fun FoodItemCard(
             .clickable { onItemClick() },
         colors = CardDefaults.cardColors(
             containerColor = if (isExpiringSoon && daysUntilExpiration >= 0)
-                MaterialTheme.colorScheme.errorContainer
-            else MaterialTheme.colorScheme.surface
-        )
+                Color(0xFFFFEB3B).copy(alpha = 0.9f)
+            else Color.White.copy(alpha = 0.9f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier
@@ -286,12 +323,13 @@ fun FoodItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = foodItem.name,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF212121)
                 )
                 Text(
                     text = "${foodItem.quantity} ${foodItem.unit} • ${foodItem.category}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(0xFF757575)
                 )
                 Text(
                     text = when {
@@ -300,8 +338,8 @@ fun FoodItemCard(
                         else -> "Expired ${-daysUntilExpiration} days ago"
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isExpiringSoon) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isExpiringSoon) Color(0xFFD32F2F)
+                    else Color(0xFF757575)
                 )
             }
 
@@ -310,14 +348,14 @@ fun FoodItemCard(
                     Icon(
                         Icons.Default.CheckCircle,
                         contentDescription = "Mark as consumed",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color(0xFF4CAF50)
                     )
                 }
                 IconButton(onClick = { showDeleteDialog = true }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete item",
-                        tint = MaterialTheme.colorScheme.error
+                        tint = Color(0xFFD32F2F)
                     )
                 }
             }
@@ -337,7 +375,7 @@ fun FoodItemCard(
                         onDelete()
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text("Delete", color = Color(0xFFD32F2F))
                 }
             },
             dismissButton = {

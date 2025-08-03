@@ -1,6 +1,8 @@
 package com.example.foodwastetracker.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -52,16 +54,32 @@ fun StatisticsScreen(
     val viewModel = remember { StatisticsViewModel(foodRepository) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF009688) // Same background as other screens
+    // Beautiful gradient background - same as other screens
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF4CAF50), // Green
+                        Color(0xFF66BB6A), // Light Green
+                        Color(0xFF81C784)  // Lighter Green
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             // Top Bar
             TopAppBar(
-                title = { Text("Statistics", color = Color.White) },
+                title = {
+                    Text(
+                        "Statistics",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -99,7 +117,7 @@ fun StatisticsScreen(
                         title = "Active Items",
                         value = uiState.activeItemsCount.toString(),
                         icon = Icons.Default.Add,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color(0xFF2196F3),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
@@ -134,7 +152,10 @@ fun StatisticsScreen(
                 // Progress Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.95f)
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp)
@@ -143,6 +164,7 @@ fun StatisticsScreen(
                             text = "Food Management Progress",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4CAF50),
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
@@ -160,7 +182,8 @@ fun StatisticsScreen(
                             ) {
                                 Text(
                                     text = "Consumption Rate",
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color(0xFF212121)
                                 )
                                 Text(
                                     text = "${(consumptionRate * 100).toInt()}%",
@@ -176,6 +199,7 @@ fun StatisticsScreen(
                                     .fillMaxWidth()
                                     .height(8.dp),
                                 color = Color(0xFF4CAF50),
+                                trackColor = Color(0xFFE8F5E8)
                             )
                         }
 
@@ -186,6 +210,7 @@ fun StatisticsScreen(
                             text = "Insights",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4CAF50),
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
@@ -211,6 +236,7 @@ fun StatisticsScreen(
                             Text(
                                 text = insight,
                                 style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF555555),
                                 modifier = Modifier.padding(vertical = 2.dp)
                             )
                         }
@@ -220,7 +246,10 @@ fun StatisticsScreen(
                 // Environmental Impact Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.95f)
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp)
@@ -229,6 +258,7 @@ fun StatisticsScreen(
                             text = "🌍 Environmental Impact",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4CAF50),
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
@@ -256,7 +286,7 @@ fun StatisticsScreen(
                         Text(
                             text = "By consuming your food items instead of wasting them, you're making a positive impact on both your wallet and the environment!",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = Color(0xFF666666)
                         )
                     }
                 }
@@ -275,7 +305,10 @@ fun StatCard(
 ) {
     Card(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.9f)
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -297,7 +330,7 @@ fun StatCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = Color(0xFF757575)
             )
         }
     }
@@ -325,8 +358,7 @@ fun ImpactItem(
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color(0xFF666666)
         )
     }
 }
-

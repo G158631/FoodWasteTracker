@@ -6,6 +6,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,7 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -51,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -110,9 +113,19 @@ fun AddFoodScreen(
     val categories = listOf("Fruits", "Vegetables", "Dairy", "Meat", "Pantry", "Frozen", "Other")
     val units = listOf("pieces", "kg", "grams", "liters", "bottles", "packages")
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF009688) // Same background as home
+    // Beautiful gradient background - same as welcome and home screen
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF4CAF50), // Green
+                        Color(0xFF66BB6A), // Light Green
+                        Color(0xFF81C784)  // Lighter Green
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier
@@ -121,7 +134,13 @@ fun AddFoodScreen(
         ) {
             // Top Bar
             TopAppBar(
-                title = { Text("Add Food Item", color = Color.White) },
+                title = {
+                    Text(
+                        "Add Food Item",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -141,7 +160,10 @@ fun AddFoodScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.95f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
@@ -150,6 +172,7 @@ fun AddFoodScreen(
                     Text(
                         text = "Food Details",
                         style = MaterialTheme.typography.headlineSmall,
+                        color = Color(0xFF4CAF50),
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
@@ -174,8 +197,9 @@ fun AddFoodScreen(
                                 }
                             },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                            containerColor = Color(0xFFF1F8E9)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -199,18 +223,18 @@ fun AddFoodScreen(
                                         Icons.Default.Add,
                                         contentDescription = "Add photo",
                                         modifier = Modifier.size(48.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = Color(0xFF4CAF50)
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         text = "📸 Tap to add photo",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = Color(0xFF4CAF50)
                                     )
                                     Text(
                                         text = "(Optional)",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = Color(0xFF757575)
                                     )
                                 }
                             }
@@ -224,7 +248,11 @@ fun AddFoodScreen(
                         label = { Text("Food Name") },
                         placeholder = { Text("e.g., Bananas, Milk, Bread") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF4CAF50),
+                            focusedLabelColor = Color(0xFF4CAF50)
+                        )
                     )
 
                     // Category Dropdown
@@ -241,7 +269,11 @@ fun AddFoodScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFF4CAF50),
+                                focusedLabelColor = Color(0xFF4CAF50)
+                            )
                         )
                         ExposedDropdownMenu(
                             expanded = categoryExpanded,
@@ -268,7 +300,11 @@ fun AddFoodScreen(
                             onValueChange = { if (it.all { char -> char.isDigit() }) quantity = it },
                             label = { Text("Quantity") },
                             modifier = Modifier.weight(1f),
-                            singleLine = true
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFF4CAF50),
+                                focusedLabelColor = Color(0xFF4CAF50)
+                            )
                         )
 
                         var unitExpanded by remember { mutableStateOf(false) }
@@ -283,7 +319,11 @@ fun AddFoodScreen(
                                 readOnly = true,
                                 label = { Text("Unit") },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
-                                modifier = Modifier.menuAnchor()
+                                modifier = Modifier.menuAnchor(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFF4CAF50),
+                                    focusedLabelColor = Color(0xFF4CAF50)
+                                )
                             )
                             ExposedDropdownMenu(
                                 expanded = unitExpanded,
@@ -311,8 +351,12 @@ fun AddFoodScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         leadingIcon = {
-                            Icon(Icons.Default.DateRange, contentDescription = null)
-                        }
+                            Icon(Icons.Default.DateRange, contentDescription = null, tint = Color(0xFF4CAF50))
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF4CAF50),
+                            focusedLabelColor = Color(0xFF4CAF50)
+                        )
                     )
 
                     // Add Button
@@ -362,7 +406,12 @@ fun AddFoodScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        enabled = foodName.isNotBlank() && category.isNotBlank() && !isLoading
+                        enabled = foodName.isNotBlank() && category.isNotBlank() && !isLoading,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF4CAF50),
+                            contentColor = Color.White
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
@@ -386,7 +435,7 @@ fun AddFoodScreen(
             text = { Text("This app needs camera permission to take photos of your food items.") },
             confirmButton = {
                 TextButton(onClick = { showPermissionDialog = false }) {
-                    Text("OK")
+                    Text("OK", color = Color(0xFF4CAF50))
                 }
             }
         )
@@ -402,7 +451,7 @@ fun AddFoodScreen(
                 TextButton(
                     onClick = { showQuantityDialog = false }
                 ) {
-                    Text("OK")
+                    Text("OK", color = Color(0xFF4CAF50))
                 }
             }
         )
